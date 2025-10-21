@@ -23,11 +23,7 @@ public class CreateUserView
         Console.WriteLine("Password: ");
         string password = Console.ReadLine() ?? "";
 
-        User newUser = new()
-        {
-            Username = username,
-            Password = password
-        };
+        User newUser = new User(username, password);
 
         User createdUser = await userRepo.AddAsync(newUser);
 
