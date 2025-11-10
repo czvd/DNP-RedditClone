@@ -1,0 +1,40 @@
+﻿@using ApiContracts.Dtos
+@using BlazorApp.Services
+
+@page "/add-user" // Makes this Razor page accessible via /add-user URL
+@inject IUserService UserService 
+@inject IJSRuntime JS
+<h3>Add New User</h3>
+
+<!-- Input fields are bound to the 'user' object below -->
+<input @bind="user.UserName" placeholder="Username" />
+<input @bind="user.Password" placeholder="Password" />
+
+<!-- Button that triggers the AddUserAsync() method -->
+<button @onclick="AddUserAsync">Add User</button>
+
+<!-- Displays success or error message -->
+<p>@message</p>
+
+@code {
+    // Object that holds form data entered by the user
+    private CreateUserDto user = new();
+    private string message = "";
+
+    private async Task AddUserAsync()
+    {
+        await JS.InvokeVoidAsync("console.log", "💡 AddUserAsync() clicked!");
+        try
+        {
+            // Sends user data (username + password) to my Web API via the injected service
+            await UserService.AddUserAsync(user);
+            message = "User added successfully!";
+            // Reset the form by creating a new empty user
+            user = new();
+        }
+        catch (Exception e)
+        {
+            message = $"Error: {e.Message}";
+        }
+    }
+}

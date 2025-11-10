@@ -1,6 +1,6 @@
-﻿namespace Entities;
+﻿namespace ApiContracts.Dtos.CommentDtos;
 
-public class Comment
+public class CommentDto
 {
     public int Id { get; set; }
     public string Body { get; set; } = "";
