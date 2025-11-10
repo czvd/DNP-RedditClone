@@ -1,4 +1,5 @@
-﻿using Entities;
+﻿using ApiContracts.Dtos.PostDtos;
+using Entities;
 using Microsoft.AspNetCore.Mvc;
 using RepositoryContracts;
 
@@ -9,10 +10,12 @@ namespace WebAPI.Controllers;
 public class PostsController : ControllerBase
 {
     private readonly IPostRepository postRepo;
+    private readonly IUserRepository userRepo;
 
-    public PostsController(IPostRepository postRepo)
+    public PostsController(IPostRepository postRepo,  IUserRepository userRepo)
     {
         this.postRepo = postRepo;
+        this.userRepo = userRepo;
     }
     
     // CREATE
@@ -21,6 +24,12 @@ public class PostsController : ControllerBase
     {
         try
         {
+            var user = await userRepo.GetSingleAsync(post.UserId);
+            if (user == null)
+            {
+                return BadRequest($"User with ID {post.UserId} does not exist.");
+            }
+            
             Post created = await postRepo.AddAsync(post);
             return Created($"/posts/{created.Id}", created);
         }
@@ -78,13 +87,13 @@ public class PostsController : ControllerBase
         try
         {
             IQueryable<Post> posts = postRepo.GetManyAsync();
-
+    
             if (!string.IsNullOrWhiteSpace(title))
                 posts = posts.Where(p => p.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
-
+    
             if (userId.HasValue)
                 posts = posts.Where(p => p.UserId == userId.Value);
-
+    
             return Ok(posts.ToList());
         }
         catch (Exception e)

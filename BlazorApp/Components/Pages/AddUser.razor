@@ -3,7 +3,6 @@
 
 @page "/add-user" // Makes this Razor page accessible via /add-user URL
 @inject IUserService UserService 
-@inject IJSRuntime JS
 <h3>Add New User</h3>
 
 <!-- Input fields are bound to the 'user' object below -->
@@ -23,7 +22,6 @@
 
     private async Task AddUserAsync()
     {
-        await JS.InvokeVoidAsync("console.log", "💡 AddUserAsync() clicked!");
         try
         {
             // Sends user data (username + password) to my Web API via the injected service

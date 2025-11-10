@@ -1,5 +1,47 @@
-﻿<h3>PostsList</h3>
+﻿@page "/posts"
+@using ApiContracts.Dtos
+@using ApiContracts.Dtos.PostDtos
+@using BlazorApp.Services
+@inject IPostService PostService
+@inject IUserService UserService
+
+<h3>All Posts</h3>
+
+@if (posts == null)
+{
+    <p>Loading posts...</p>
+}
+else if (posts.Count == 0)
+{
+    <p>No posts available.</p>
+}
+else
+{
+    <ul>
+        @foreach (var post in posts)
+        {
+            <li>
+                <a href="@($"/posts/{post.Id}")">@post.Title</a>
+                <span style="color: gray;"> — by @GetAuthorName(post.UserId)</span>
+            </li>
+        }
+    </ul>
+}
 
 @code {
+    private List<PostDto>? posts;
+    private List<UserDto>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        posts = await PostService.GetPostsAsync();
+        users = await UserService.GetUsersAsync();
+    }
     
+    private string GetAuthorName(int userId)
+    {
+        // Find the user by ID and return their name
+        var user = users?.FirstOrDefault(u => u.Id == userId);
+        return user != null ? user.Username : "Unknown";
+    }
 }

@@ -1,5 +1,6 @@
 using BlazorApp.Components;
 using BlazorApp.Services;
+using BlazorApp.Services.Comment;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +15,11 @@ builder.Services.AddScoped(sp => new HttpClient
         BaseAddress = new Uri("https://localhost:9130")
     }
 );
+
 builder.Services.AddScoped<IUserService, HttpUserService>();
+builder.Services.AddScoped<IPostService, HttpPostService>();
+builder.Services.AddScoped<ICommentService, HttpCommentService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

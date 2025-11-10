@@ -50,9 +50,10 @@ public class HttpPostService : IPostService
             PropertyNameCaseInsensitive = true
         })!;
     }
+    
     public async Task<List<PostDto>> GetPostsAsync()
     {
-        HttpResponseMessage httpResponse = await client.GetAsync("users");
+        HttpResponseMessage httpResponse = await client.GetAsync("posts");
         string response = await httpResponse.Content.ReadAsStringAsync();
         
         if (!httpResponse.IsSuccessStatusCode)

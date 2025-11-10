@@ -1,5 +1,51 @@
-﻿<h3>CreatePost</h3>
+﻿@page "/create-post"
+@using ApiContracts.Dtos.PostDtos
+@using BlazorApp.Services
+@inject IPostService PostService
+
+<h3>Create New Post</h3>
+
+<div style="display: flex; flex-direction: column; gap: 10px; max-width: 400px;">
+    <input @bind="post.Title" placeholder="Title" />
+
+    <textarea @bind="post.Body" placeholder="Body" rows="4"></textarea>
+
+    <input type="number" @bind="post.UserId" min="0" placeholder="User ID" />
+
+    <button @onclick="AddPostAsync">Create Post</button>
+</div>
+
+<button @onclick="AddPostAsync">Create Post</button>
+
+<p>@message</p>
 
 @code {
-    
+    private CreatePostDto post = new();
+    private string message = "";
+
+    private async Task AddPostAsync()
+    {
+        try
+        {
+            if (post.UserId is null)
+            {
+                message = "Error: Please enter a user ID.";
+                return;
+            }
+            
+            if (post.UserId < 1)
+            {
+                message = "Error: User ID cannot be less than 1.";
+                return;
+            }
+
+            await PostService.AddPostAsync(post);
+            message = "Post created successfully!";
+            post = new(); // reset form
+        }
+        catch (Exception e)
+        {
+            message = $"Error: {e.Message}";
+        }
+    }
 }

@@ -23,6 +23,12 @@ public class CommentsController : ControllerBase
     {
         try
         {
+            var user = await userRepo.GetSingleAsync(comment.UserId);
+            if (user == null)
+            {
+                return BadRequest($"User with ID {comment.UserId} does not exist.");
+            }
+            
             Comment created = await commentRepo.AddAsync(comment);
             return Created($"/comments/{created.Id}", created);
         }
