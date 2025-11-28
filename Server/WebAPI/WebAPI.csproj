@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Shared\ApiContracts\ApiContracts.csproj" />
+      <ProjectReference Include="..\ApiContracts\ApiContracts.csproj" />
+      <ProjectReference Include="..\EfcRepositories\EfcRepositories.csproj" />
+      <ProjectReference Include="..\FileRepositories\FileRepositories.csproj" />
+      <ProjectReference Include="..\RepositoryContracts\RepositoryContracts.csproj" />
+    </ItemGroup>
+
+</Project>
