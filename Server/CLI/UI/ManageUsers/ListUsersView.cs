@@ -17,7 +17,7 @@ public class ListUsersView
         Console.WriteLine("=== All Users (id, username) ===");
         Console.WriteLine();
 
-        var users = userRepo.GetManyAsync().ToList();
+        var users = userRepo.GetMany().ToList();
 
         if (users.Count == 0)
         {

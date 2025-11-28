@@ -67,7 +67,7 @@ public class SinglePostView
         Console.WriteLine();
         
         // Get comments for this post
-        var comments = commentRepo.GetManyAsync()
+        var comments = commentRepo.GetMany()
             .Where(c => c.PostId == post.Id)
             .ToList();
 

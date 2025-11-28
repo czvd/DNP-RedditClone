@@ -10,7 +10,7 @@ public class Post
     public int UserId { get; set; }
     
     // Navigation to User
-    public User User { get; private set; }
+    public User? User { get; set; }
     
     // Navigation to comments
     public List<Comment> Comments { get; private set; } = new();

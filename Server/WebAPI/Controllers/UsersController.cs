@@ -1,6 +1,7 @@
 ﻿using ApiContracts.Dtos;
 using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebAPI.Controllers;
@@ -88,24 +89,24 @@ public class UsersController : ControllerBase
     
     // GET MANY (with optional filtering by username substring)
     [HttpGet]
-    public ActionResult<IEnumerable<UserDto>> GetMany([FromQuery] string? usernameContains)
+    public async Task<ActionResult<IEnumerable<UserDto>>> GetMany([FromQuery] string? usernameContains)
     {
         try
         {
-            var query = userRepo.GetManyAsync();
+            var query = userRepo.GetMany();
 
             if (!string.IsNullOrWhiteSpace(usernameContains))
             {
                 query = query.Where(u => u.Username.Contains(usernameContains, StringComparison.OrdinalIgnoreCase));
             }
 
-            var result = query
+            var result = await query
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
                     Username = u.Username
                 })
-                .ToList();
+                .ToListAsync();
 
             return Ok(result);
         }

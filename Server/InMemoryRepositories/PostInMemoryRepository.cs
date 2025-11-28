@@ -52,7 +52,7 @@ public class PostInMemoryRepository : IPostRepository
         return Task.FromResult(postToGet);
     }
 
-    public IQueryable<Post> GetManyAsync()
+    public IQueryable<Post> GetMany()
     {
         return posts.AsQueryable();
     }

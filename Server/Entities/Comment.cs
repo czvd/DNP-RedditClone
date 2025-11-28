@@ -10,8 +10,8 @@ public class Comment
     public int UserId { get; set; }
     
     // Navigation properties
-    public Post Post { get; private set; }
-    public User User { get; private set; }
+    public Post? Post { get; set; } = null!;
+    public User User { get; set; }
     
     private Comment() {} // Required by EF Core
 

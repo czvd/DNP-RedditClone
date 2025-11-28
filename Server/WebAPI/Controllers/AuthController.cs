@@ -21,7 +21,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var user = userRepo.GetManyAsync().SingleOrDefault(u => u.Username == request.UserName);
+            var user = userRepo.GetMany().SingleOrDefault(u => u.Username == request.UserName);
 
             if (user == null)
                 return Unauthorized("User not fount");

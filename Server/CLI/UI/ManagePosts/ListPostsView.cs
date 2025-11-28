@@ -17,7 +17,7 @@ public class ListPostsView
         Console.WriteLine("=== All Posts (id, title) ===");
         Console.WriteLine();
 
-        var posts = postRepo.GetManyAsync().ToList();
+        var posts = postRepo.GetMany().ToList();
 
         if (posts.Count == 0)
         {

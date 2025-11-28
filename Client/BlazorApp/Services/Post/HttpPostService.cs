@@ -50,7 +50,13 @@ public class HttpPostService : IPostService
             PropertyNameCaseInsensitive = true
         })!;
     }
-    
+    public async Task<PostWithCommentsDto?> GetPostWithCommentsAsync(int id)
+    {
+        var response = await client.GetAsync($"posts/withComments/{id}");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<PostWithCommentsDto>() ?? throw new InvalidOperationException("Post not found");
+    }
+
     public async Task<List<PostDto>> GetPostsAsync()
     {
         HttpResponseMessage httpResponse = await client.GetAsync("posts");

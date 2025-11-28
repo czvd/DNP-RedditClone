@@ -19,7 +19,7 @@ public class CreatePostView
         Console.Clear();
         Console.WriteLine("=== Create Post ===");
 
-        var users = userRepo.GetManyAsync().ToList();
+        var users = userRepo.GetMany().ToList();
         if (users.Count == 0)
         {
             Console.WriteLine("Cannot create post — no users exist in the system.");

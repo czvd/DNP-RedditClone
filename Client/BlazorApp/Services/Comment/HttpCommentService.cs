@@ -52,7 +52,13 @@ public class HttpCommentService : ICommentService
             PropertyNameCaseInsensitive = true
         })!;
     }
-    
+    public async Task<CommentUsername> GetCommentUsernameAsync(int id)
+    {
+        var response = await client.GetAsync($"comments/username/{id}");
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<CommentUsername>() ?? throw new InvalidOperationException("Comment not found");
+    }
+
     public async Task<List<CommentDto>> GetCommentsAsync()
     {
         HttpResponseMessage httpResponse = await client.GetAsync("comments");

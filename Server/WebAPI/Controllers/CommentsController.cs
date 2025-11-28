@@ -1,5 +1,7 @@
-﻿using Entities;
+﻿using ApiContracts.Dtos.CommentDtos;
+using Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using RepositoryContracts;
 
 namespace WebAPI.Controllers;
@@ -10,16 +12,18 @@ public class CommentsController : ControllerBase
 {
     private readonly ICommentRepository commentRepo;
     private readonly IUserRepository userRepo;
+    private readonly IPostRepository postRepo;
 
-    public CommentsController(ICommentRepository commentRepo, IUserRepository userRepo)
+    public CommentsController(ICommentRepository commentRepo, IUserRepository userRepo, IPostRepository postRepo)
     {
+        this.postRepo =  postRepo;
         this.commentRepo = commentRepo;
         this.userRepo = userRepo;
     }
     
     // CREATE
     [HttpPost]
-    public async Task<ActionResult<Comment>> AddComment([FromBody] Comment comment)
+    public async Task<ActionResult<CommentDto>> AddComment([FromBody] CreateCommentDto comment)
     {
         try
         {
@@ -28,9 +32,22 @@ public class CommentsController : ControllerBase
             {
                 return BadRequest($"User with ID {comment.UserId} does not exist.");
             }
+
+            var post = await postRepo.GetSingleAsync(comment.PostId);
+
+            var toBeCreated = new Comment(comment.Body, comment.PostId, comment.UserId);
+            toBeCreated.User = user;
+            toBeCreated.Post = post;
+            Comment created = await commentRepo.AddAsync(toBeCreated);
             
-            Comment created = await commentRepo.AddAsync(comment);
-            return Created($"/comments/{created.Id}", created);
+            CommentDto dto = new CommentDto()
+            {
+                Id = created.Id,
+                PostId = created.PostId,
+                UserId = created.UserId,
+                Body = comment.Body,
+            };
+            return Created($"/comments/{dto.Id}", dto);
         }
         catch (Exception e)
         {
@@ -62,12 +79,18 @@ public class CommentsController : ControllerBase
     
     // GET SINGLE
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<Comment>> GetSingle(int id)
+    public async Task<ActionResult<CommentDto>> GetSingle(int id)
     {
         try
         {
             Comment comment = await commentRepo.GetSingleAsync(id);
-            return Ok(comment);
+            return Ok(new CommentDto()
+            {
+                Body = comment.Body,
+                Id = comment.Id,
+                PostId = comment.PostId,
+                UserId = comment.UserId,
+            });
         }
         catch (InvalidOperationException e)
         {
@@ -81,14 +104,14 @@ public class CommentsController : ControllerBase
     
     // GET MANY
     [HttpGet]
-    public ActionResult<IEnumerable<Comment>> GetMany(
+    public async Task<ActionResult<IEnumerable<Comment>>> GetMany(
         [FromQuery] int? postId,
         [FromQuery] int? userId,
         [FromQuery] string? userName)
     {
         try
         {
-            IQueryable<Comment> comments = commentRepo.GetManyAsync();
+            IQueryable<Comment> comments = commentRepo.GetMany();
 
             // Filter by post ID
             if (postId.HasValue)
@@ -98,18 +121,23 @@ public class CommentsController : ControllerBase
             if (userId.HasValue)
                 comments = comments.Where(c => c.UserId == userId.Value);
 
-            // Filter by username (requires lookup in userRepo)
+            // Filter by username
             if (!string.IsNullOrWhiteSpace(userName))
             {
-                var users = userRepo.GetManyAsync()
-                    .Where(u => u.Username.Contains(userName, StringComparison.OrdinalIgnoreCase))
-                    .Select(u => u.Id)
-                    .ToList();
+                string lowered = userName.ToLower();
 
-                comments = comments.Where(c => users.Contains(c.UserId));
+                // Get matching user IDs ASYNC
+                var matchingUserIds = await userRepo.GetMany()
+                    .Where(u => u.Username.ToLower().Contains(lowered))
+                    .Select(u => u.Id)
+                    .ToListAsync();
+
+                // Apply filtering using SQL IN (...)
+                comments = comments.Where(c => matchingUserIds.Contains(c.UserId));
             }
 
-            return Ok(comments.ToList());
+            var result = await comments.ToListAsync();
+            return Ok(result);
         }
         catch (Exception e)
         {
@@ -124,6 +152,24 @@ public class CommentsController : ControllerBase
         {
             await commentRepo.DeleteAsync(id);
             return NoContent();
+        }
+        catch (InvalidOperationException e)
+        {
+            return NotFound(e.Message);
+        }
+        catch (Exception e)
+        {
+            return StatusCode(500, e.Message);
+        }
+    }
+    [HttpGet("username/{id:int}")]
+    public async Task<ActionResult<CommentUsername>> GetSingleWithComments(int id)
+    {
+        try
+        {
+            Comment comment = await commentRepo.GetSingleAsync(id);
+            User? user = await userRepo.GetSingleAsync(comment.UserId);
+            return Ok(new CommentUsername(comment.Id,comment.Body,user.Username, comment.PostId));
         }
         catch (InvalidOperationException e)
         {
